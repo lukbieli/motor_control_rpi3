@@ -1,0 +1,21 @@
+#ifndef EAA5739D_F4EB_463A_AD27_546F7C8E4214
+#define EAA5739D_F4EB_463A_AD27_546F7C8E4214
+
+#include "motor_ctrl.hpp"
+
+class RobotMove {
+    public:
+        // Constructor without arguments
+        RobotMove(int timer1, int timer2);
+
+        // Public method to move the robot
+        void move(double left, double right);
+
+        // Public method to stop the robot
+        void stop();
+    private:
+        MotorCtrl motorLeft;
+        MotorCtrl motorRight;
+};
+
+#endif /* EAA5739D_F4EB_463A_AD27_546F7C8E4214 */

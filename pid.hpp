@@ -1,3 +1,6 @@
+#ifndef E4429DDA_2009_4B80_B027_2D0590147712
+#define E4429DDA_2009_4B80_B027_2D0590147712
+
 #define MANUAL 0
 #define AUTOMATIC 1
  
@@ -56,3 +59,6 @@ class PID{
         double autoTuneSetpoint_ = 0.0; // Setpoint for auto-tuning
         double autoTuneStartTime_ = 0; // Start time of auto-tuning (iteration count)
 };
+
+
+#endif /* E4429DDA_2009_4B80_B027_2D0590147712 */
