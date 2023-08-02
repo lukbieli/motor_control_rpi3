@@ -1,6 +1,12 @@
 #include "pid.hpp"
 
-
+PID::PID(void)
+{
+    this->Input = 0;
+    this->Output = 0;
+    this->ITerm = 0;
+    this->lastInput = 0;
+}
 
 double PID::Compute(double in)
 {
@@ -32,6 +38,9 @@ double PID::Compute(double in)
 
 void PID::Reset()
 {
+    this->Input = 0;
+    this->Output = 0;
+    this->ITerm = 0;
     this->lastInput = 0;
 }
 

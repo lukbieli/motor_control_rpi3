@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <cmath>
 #include "pid.hpp"
+#include <string.h>
 
 typedef enum MotorCtrl_Direction
 {
@@ -21,6 +22,9 @@ class MotorCtrl{
         void kill(void); /* kills entire sampling */
         void forcePwm(int pwm);
 
+        void printHistory(int max);
+        void saveHistoryToFile(string name);
+
     private:
 
         unsigned int GPIO_PWM;
@@ -28,7 +32,7 @@ class MotorCtrl{
         unsigned int GPIO_IN2 = 0;
         unsigned int GPIO_ENC = 0;
         const double wheel_diam = 65.0; /* diameter in mm */
-        const double wheel_circ = wheel_diam * M_PI * 2; /* wheel circuit */
+        const double wheel_circ = wheel_diam * M_PI; /* wheel circuit */
         const int samplingRate = 150; /* encoder + pid sampling rate*/
         const double samplingRateS = (double)samplingRate/1000.0; /* encoder + pid sampling rate*/
         const double speedMin = 0.5; /* minimum speed in m/s */

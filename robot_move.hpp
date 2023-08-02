@@ -16,9 +16,13 @@ class RobotMove {
         void stop();
 
         void kill();
-    private:
+
+        
         MotorCtrl motorLeft;
         MotorCtrl motorRight;
+    // private:
+        // MotorCtrl motorLeft;
+        // MotorCtrl motorRight;
 };
 
 #endif /* EAA5739D_F4EB_463A_AD27_546F7C8E4214 */

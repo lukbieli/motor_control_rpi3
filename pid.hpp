@@ -10,6 +10,7 @@
 class PID{
 
     public:
+        PID(void);
         double Compute(double in);
 
         void SetSetpoint(double sp);
@@ -37,10 +38,10 @@ class PID{
 
     private:
         /*working variables*/
-        unsigned long lastTime;
-        double Input, Output, Setpoint;
-        double ITerm, lastInput;
-        double kp, ki, kd;
+        unsigned long lastTime = 0;
+        double Input, Output, Setpoint = 0.0;
+        double ITerm, lastInput = 0.0;
+        double kp, ki, kd = 0.0;
         int SampleTime = 1000; // 1 sec
         double outMin, outMax;
         bool inAuto = false;

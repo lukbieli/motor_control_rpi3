@@ -31,10 +31,10 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
     gpioSetAlertFuncEx(this->GPIO_ENC, this->encoderCbkExt, (void*)this);
 
     /* PID setup*/
-
+    this->pid.Reset();
     this->pid.SetTunings(34.0,28.0,0.5); /* 15.0,13.0,0.0 */
-    this->pid.SetMode(AUTOMATIC);
     this->pid.SetOutputLimits(50.0,255.0);
+    this->pid.SetMode(AUTOMATIC);
     // this->pid.SetSetpoint(1.5);
     this->pid.SetSampleTime(this->samplingRate);
 
@@ -162,4 +162,14 @@ void MotorCtrl::timerSampleExt(void *user)
    MotorCtrl *mySelf = (MotorCtrl *) user;
 
    mySelf->timerSample(); /* Call the instance callback. */
+}
+
+void MotorCtrl::printHistory(int max){
+    printf("History:\n");
+    printf("OUT\t|\tENC\t|\tIN\n");
+
+    for(int i = 0; i < max; i++)
+    {
+        printf("%.2f\t|\t%d\t|\t%.2f\n",this->historyOut[i],this->historyEnc[i],this->historyIn[i]);
+    }
 }

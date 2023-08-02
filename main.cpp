@@ -22,10 +22,15 @@ int main() {
     ADCCtrl Adc = ADCCtrl(PIN_ADC_CS,PIN_ADC_ADDR,PIN_ADC_IOCLK,PIN_ADC_DOUT);
 
     printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
-    Robot.move(0.5,0.5);
+    Robot.move(0.8,0.8);
     // Robot.moveDirect(80,80);
     sleep(1);
     Robot.stop();
+
+    printf("Motor left\n");
+    Robot.motorLeft.printHistory(10);
+    printf("Motor right\n");
+    Robot.motorRight.printHistory(10);
 
     Robot.kill();
     gpioTerminate();
