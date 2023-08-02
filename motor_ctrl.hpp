@@ -1,6 +1,8 @@
 #ifndef C5F21679_1B27_4C83_AD6D_6B90A049401B
 #define C5F21679_1B27_4C83_AD6D_6B90A049401B
 
+#include <stdint.h>
+#include <cmath>
 #include "pid.hpp"
 
 typedef enum MotorCtrl_Direction
@@ -17,10 +19,9 @@ class MotorCtrl{
         void start(void); /* starts sampling */
         void stop(void); /* stops motor */
         void kill(void); /* kills entire sampling */
+        void forcePwm(int pwm);
 
     private:
-        void encoderCbk(int gpio, int level, uint32_t tick);
-        void timerSample(void);
 
         unsigned int GPIO_PWM;
         unsigned int GPIO_IN1 = 0;
@@ -43,7 +44,15 @@ class MotorCtrl{
         double historyOut[100] = {0.0};
         double historyIn[100] = {0.0};
         double historyErr[100] = {0.0};
+        int historyEnc[100] = {0};
         int historyIdx = 0;
+        
+        void encoderCbk(int gpio, int level, uint32_t tick);
+        static void encoderCbkExt(int gpio, int level, uint32_t tick, void *user);
+        void timerSample(void);
+        static void timerSampleExt(void *user);
+        int mode = 0;
+        bool runFlag = false;
 };
 
 

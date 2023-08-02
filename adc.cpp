@@ -1,6 +1,7 @@
 
 #include <pigpio.h>
 #include "adc.hpp"
+#include <unistd.h>
 
 ADCCtrl::ADCCtrl(const int pin_cs, const int pin_addr, const int pin_ioclk, const int pin_dout)
 {

@@ -5,7 +5,7 @@
 #include <pigpio.h>
 #include <unistd.h>
 
-MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC, const int timerNum)
+void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC, const int timerNum)
 {
     this->GPIO_PWM = PIN_PWM;
     this->GPIO_IN1 = PIN_IN1;
@@ -27,7 +27,8 @@ MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const 
     gpioSetMode(this->GPIO_ENC, PI_INPUT);
     gpioSetPullUpDown(this->GPIO_ENC, PI_PUD_UP);
     /* monitor encoder level changes */
-    gpioSetAlertFunc(this->GPIO_ENC, this->encoderCbk);
+    this->enc_counter = 0;
+    gpioSetAlertFuncEx(this->GPIO_ENC, this->encoderCbkExt, (void*)this);
 
     /* PID setup*/
 
@@ -40,14 +41,17 @@ MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const 
     /* enable sampling timer */
     this->timerId = timerNum;
 
+    mode = 1; /* PID controller */
+
 }
 
 void MotorCtrl::setSpeed(double reqSpeed)
 {
-    if((reqSpeed >= this->speedMin) && (reqSpeed <= this>speedMax))
+    if((reqSpeed >= this->speedMin) && (reqSpeed <= this->speedMax))
     {
         this->setpoint = reqSpeed;
         pid.SetSetpoint(this->setpoint);
+        this->runFlag = true;
     }
 }
 void MotorCtrl::setDirection(MotorCtrl_Direction dir)
@@ -66,11 +70,19 @@ void MotorCtrl::setDirection(MotorCtrl_Direction dir)
 }
 void MotorCtrl::start(void)
 {
+    if(this->mode == 2)
+    {
+        this->mode = 1;
+        this->stop();
+        this->pid.Reset();
+    }
     /* enable sampling timer */
-    gpioSetTimerFunc(this->timerId,this->samplingRate,this->timerSample);
+    gpioSetTimerFuncEx(this->timerId,this->samplingRate,this->timerSampleExt,(void*)this);
+    this->enc_counter = 0;
 }
 void MotorCtrl::stop(void)
 {
+    this->runFlag = false;
     gpioWrite(this->GPIO_IN1,0);
     gpioWrite(this->GPIO_IN2,0);
     gpioPWM(this->GPIO_PWM,0);
@@ -79,31 +91,75 @@ void MotorCtrl::kill(void)
 {
     this->stop();
     gpioSetTimerFunc(this->timerId,this->samplingRate,NULL);
+    this->pid.Reset();
+}
+
+void MotorCtrl::forcePwm(int pwm)
+{
+    if(this->mode == 1)
+    {
+        gpioSetTimerFunc(this->timerId,this->samplingRate,NULL);
+        this->mode = 2;
+    }
+    gpioPWM(this->GPIO_PWM,pwm);
 }
 
 void MotorCtrl::encoderCbk(int gpio, int level, uint32_t tick)
 {
-    enc_counter++;
+    this->enc_counter++;
+}
+
+void MotorCtrl::encoderCbkExt(int gpio, int level, uint32_t tick, void *user)
+{
+   /*
+      Need a static callback to link with C.
+   */
+
+   MotorCtrl *mySelf = (MotorCtrl *) user;
+
+   mySelf->encoderCbk(gpio, level, tick); /* Call the instance callback. */
 }
 
 void MotorCtrl::timerSample(void)
 {
-    double rps_l = ((double)enc_counter/20.0)/(samplingRateS);
-    this->speed = (wheel_circ * rps_l)/1000.0; /* in m/s*/
-    enc_counter = 0;
-
-    /* compute PID */
-    double out = pidLeft.Compute(this->speed);
-
-    if(this->historyIdx > 100)
+    if(this->runFlag)
     {
-        this->historyIdx = 0;
-    }
-    this->historyIn[this->historyIdx] = this->speed;
-    this->historyOut[this->historyIdx] = out;
-    this->historyErr[this->historyIdx] = this->setpoint;
-    
-    this->historyIdx++;
+        if(this->enc_counter > 0)
+        {
+            double rps_l = ((double)this->enc_counter/20.0)/(samplingRateS);
+            this->speed = (wheel_circ * rps_l)/1000.0; /* in m/s*/
+        }
+        else
+        {
+            this->speed = 0;
+        }
 
-    gpioPWM(this->GPIO_PWM,out);
+        /* compute PID */
+        double out = this->pid.Compute(this->speed);
+
+        if(this->historyIdx > 100)
+        {
+            this->historyIdx = 0;
+        }
+        this->historyIn[this->historyIdx] = this->speed;
+        this->historyOut[this->historyIdx] = out;
+        this->historyErr[this->historyIdx] = this->setpoint;
+        this->historyEnc[this->historyIdx] = this->enc_counter;
+        this->enc_counter = 0;
+        
+        this->historyIdx++;
+
+        gpioPWM(this->GPIO_PWM,out);
+    }
+}
+
+void MotorCtrl::timerSampleExt(void *user)
+{
+   /*
+      Need a static callback to link with C.
+   */
+
+   MotorCtrl *mySelf = (MotorCtrl *) user;
+
+   mySelf->timerSample(); /* Call the instance callback. */
 }

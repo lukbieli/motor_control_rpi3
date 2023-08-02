@@ -33,6 +33,8 @@ class PID{
 
         void AutoTuneStep();
 
+        void Reset();
+
     private:
         /*working variables*/
         unsigned long lastTime;

@@ -30,6 +30,11 @@ double PID::Compute(double in)
     return this->Output;
 }
 
+void PID::Reset()
+{
+    this->lastInput = 0;
+}
+
 void PID::SetSetpoint(double sp)
 {
     this->Setpoint = sp;

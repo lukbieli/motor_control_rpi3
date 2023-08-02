@@ -10,9 +10,12 @@ class RobotMove {
 
         // Public method to move the robot
         void move(double left, double right);
+        void moveDirect(int left, int right);
 
         // Public method to stop the robot
         void stop();
+
+        void kill();
     private:
         MotorCtrl motorLeft;
         MotorCtrl motorRight;
