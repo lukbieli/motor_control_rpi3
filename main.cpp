@@ -10,6 +10,9 @@
 #include "alphabot_cfg.h"
 /* g++ -Wall -pthread -o foobar ../main.cpp ../pid.cpp ../acd.cpp ../motor_ctrl.cpp ../robot_move.cpp -lpigpio -lrt -lc -g */
 
+/* run: sudo ./main -a 0.5 0.5 4 -c 24.0 55.7 0.9 -t 2 */
+
+/* to plot: python plot.py plot.png*/
 typedef enum{
     MODE_PID = 0,
     MODE_PWM
