@@ -32,8 +32,8 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
 
     /* PID setup*/
     this->pid.Reset();
-    this->pid.SetTunings(34.0,28.0,0.5); /* 15.0,13.0,0.0 */
-    this->pid.SetOutputLimits(50.0,255.0);
+    this->pid.SetTunings(24.0,55.0,1.0); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 */
+    this->pid.SetOutputLimits(20.0,255.0);
     this->pid.SetMode(AUTOMATIC);
     // this->pid.SetSetpoint(1.5);
     this->pid.SetSampleTime(this->samplingRate);
@@ -43,6 +43,11 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
 
     mode = 1; /* PID controller */
 
+}
+
+void MotorCtrl::setPidTunnings(double kp, double ki, double kd)
+{
+    this->pid.SetTunings(kp,ki,kd);
 }
 
 void MotorCtrl::setSpeed(double reqSpeed)
@@ -143,7 +148,8 @@ void MotorCtrl::timerSample(void)
         }
         this->historyIn[this->historyIdx] = this->speed;
         this->historyOut[this->historyIdx] = out;
-        this->historyErr[this->historyIdx] = this->setpoint;
+        this->historyErr[this->historyIdx] = this->setpoint - this->speed;
+        this->historySet[this->historyIdx] = this->setpoint;
         this->historyEnc[this->historyIdx] = this->enc_counter;
         this->enc_counter = 0;
         
@@ -171,5 +177,23 @@ void MotorCtrl::printHistory(int max){
     for(int i = 0; i < max; i++)
     {
         printf("%.2f\t|\t%d\t|\t%.2f\n",this->historyOut[i],this->historyEnc[i],this->historyIn[i]);
+    }
+}
+
+void MotorCtrl::saveHistoryToCSV(const std::string& filename) {
+    std::ofstream outputFile(filename);
+
+    if (outputFile.is_open()) {
+        outputFile << "OUT,ENC,IN,SET" << std::endl;
+        for (int i = 0; i < this->historyIdx; ++i) {
+            // Separate elements with commas (CSV format)
+            outputFile << this->historyOut[i] << "," << this->historyEnc[i] << "," << this->historyIn[i] << "," << this->historySet[i] << std::endl;
+            
+        }
+
+        outputFile.close();
+        std::cout << "Array saved to " << filename << " successfully." << std::endl;
+    } else {
+        std::cerr << "Error opening file: " << filename << std::endl;
     }
 }

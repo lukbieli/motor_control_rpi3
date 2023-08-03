@@ -8,8 +8,8 @@
 #define PIN_HBRIDGE_IN3 (20)
 #define PIN_HBRIDGE_IN4 (21)
 
-#define PIN_ENC_L (8)
-#define PIN_ENC_R (7)
+#define PIN_ENC_R (8)
+#define PIN_ENC_L (7)
 
 #define PIN_ADC_IOCLK (25)
 #define PIN_ADC_ADDR (24)

@@ -5,6 +5,8 @@
 #include <cmath>
 #include "pid.hpp"
 #include <string.h>
+#include <iostream>
+#include <fstream>
 
 typedef enum MotorCtrl_Direction
 {
@@ -23,7 +25,8 @@ class MotorCtrl{
         void forcePwm(int pwm);
 
         void printHistory(int max);
-        void saveHistoryToFile(string name);
+        void saveHistoryToCSV(const std::string& filename);
+        void setPidTunnings(double kp, double ki, double kd);
 
     private:
 
@@ -33,10 +36,10 @@ class MotorCtrl{
         unsigned int GPIO_ENC = 0;
         const double wheel_diam = 65.0; /* diameter in mm */
         const double wheel_circ = wheel_diam * M_PI; /* wheel circuit */
-        const int samplingRate = 150; /* encoder + pid sampling rate*/
+        const int samplingRate = 100; /* encoder + pid sampling rate*/
         const double samplingRateS = (double)samplingRate/1000.0; /* encoder + pid sampling rate*/
-        const double speedMin = 0.5; /* minimum speed in m/s */
-        const double speedMax = 1.5; /* maximal speed in m/s */
+        const double speedMin = 0; /* minimum speed in m/s */
+        const double speedMax = 5.0; /* maximal speed in m/s */
 
         PID pid;
         int timerId;
@@ -49,6 +52,7 @@ class MotorCtrl{
         double historyIn[100] = {0.0};
         double historyErr[100] = {0.0};
         int historyEnc[100] = {0};
+        double historySet[100] = {0};
         int historyIdx = 0;
         
         void encoderCbk(int gpio, int level, uint32_t tick);
