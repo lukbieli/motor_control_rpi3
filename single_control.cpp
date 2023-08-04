@@ -8,11 +8,13 @@
 #include "robot_move.hpp"
 #include "adc.hpp"
 #include "alphabot_cfg.h"
-/* g++ -Wall -pthread -o foobar ../main.cpp ../pid.cpp ../acd.cpp ../motor_ctrl.cpp ../robot_move.cpp -lpigpio -lrt -lc -g */
 
-/* run: sudo ./main -a 0.5 0.5 4 -c 24.0 55.7 0.9 -t 2 */
+/* Single control */
+/* g++ -Wall -pthread -o single_control ../single_control.cpp ../pid.cpp ../adc.cpp ../motor_ctrl.cpp ../robot_move.cpp -lpigpio -lrt -lc -g */
 
+/* run: sudo ./single_control -a 0.5 0.5 4 -c 24.0 55.7 0.9 -t 2 */
 /* to plot: python plot.py plot.png*/
+
 typedef enum{
     MODE_PID = 0,
     MODE_PWM
