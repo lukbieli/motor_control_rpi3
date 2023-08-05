@@ -50,7 +50,7 @@ class PID{
         double autoTuneStep_;       // Auto-tuning step size
         int autoTuneState_ = 0;     // Current auto-tuning state
         double autoTuneKu_ = 0.0;   // Ultimate gain during auto-tuning
-        double autoTuneTu_ = 3000.0;  // Ultimate period during auto-tuning (default value: 10 seconds)
+        double autoTuneTu_ = 10000.0;  // Ultimate period during auto-tuning (default value: 10 seconds)
         double autoTuneKc_ = 0.0;   // Ultimate gain for PID tuning
         double autoTuneTi_ = 0.0;   // Ultimate period for integral time constant
         double autoTuneTd_ = 0.0;   // Ultimate period for derivative time constant

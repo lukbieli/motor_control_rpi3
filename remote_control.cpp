@@ -133,6 +133,11 @@ int main(int argc, char* argv[]) {
     }
 
     Robot.stop();
+    double kp,ki,kd = 0.0;
+    Robot.motorLeft.pid.GetTunings(&kp,&ki,&kd);
+    std::cout << "TUN_L: KP=" << kp << " | KI=" <<  ki << " | KD=" <<  kd << std::endl; 
+    Robot.motorRight.pid.GetTunings(&kp,&ki,&kd);
+    std::cout << "TUN_R: KP=" << kp << " | KI=" <<  ki << " | KD=" <<  kd << std::endl; 
 
     
     Robot.motorLeft.saveHistoryToCSV("motorLeftPid.csv");

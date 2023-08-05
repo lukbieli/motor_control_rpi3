@@ -30,6 +30,8 @@ class MotorCtrl{
         void printHistory(int max);
         void saveHistoryToCSV(const std::string& filename);
         void setPidTunnings(double kp, double ki, double kd);
+        
+        PID pid;
 
     private:
 
@@ -44,7 +46,6 @@ class MotorCtrl{
         const double speedMin = 0; /* minimum speed in m/s */
         const double speedMax = 5.0; /* maximal speed in m/s */
 
-        PID pid;
         int timerId;
         MotorCtrl_Direction direction = MotCtrl_NULL;
         volatile int enc_counter;

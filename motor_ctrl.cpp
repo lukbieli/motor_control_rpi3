@@ -32,7 +32,7 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
 
     /* PID setup*/
     this->pid.Reset();
-    this->pid.SetTunings(24.0,55.0,1.0); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 */
+    this->pid.SetTunings(24.0,55.0,1.0); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 | 110.0 42.0 0.5*/
     this->pid.SetOutputLimits(0.0,255.0);
     this->pid.SetMode(AUTOMATIC);
     // this->pid.SetSetpoint(1.5);
@@ -132,6 +132,8 @@ void MotorCtrl::encoderCbkExt(int gpio, int level, uint32_t tick, void *user)
 
 void MotorCtrl::timerSample(void)
 {
+    // static int i = 0;
+    // static bool once = true;
     if(this->runFlag)
     {
         if(this->enc_counter > 0)
@@ -160,6 +162,12 @@ void MotorCtrl::timerSample(void)
         this->enc_counter = 0;
 
         gpioPWM(this->GPIO_PWM,out);
+
+        // if (i++ == 20 && once) {
+        //     this->pid.EnableAutoTune(10.0);
+        //     once = false;
+        // }
+        // this->pid.AutoTuneStep();
     }
 }
 
