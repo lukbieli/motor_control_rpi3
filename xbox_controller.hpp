@@ -9,6 +9,7 @@ typedef enum XB_Event_type
 {
     XB_EV_GAS = 0,
     XB_EV_X_AXSIS,
+    XB_EV_BREAK,
     XB_EV_BURGER /* type 4 (EV_MSC), code 4 (MSC_SCAN), value 90008 */
 } XB_Event_type;
 

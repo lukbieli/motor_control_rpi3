@@ -33,7 +33,7 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
     /* PID setup*/
     this->pid.Reset();
     this->pid.SetTunings(24.0,55.0,1.0); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 */
-    this->pid.SetOutputLimits(20.0,255.0);
+    this->pid.SetOutputLimits(0.0,255.0);
     this->pid.SetMode(AUTOMATIC);
     // this->pid.SetSetpoint(1.5);
     this->pid.SetSampleTime(this->samplingRate);
@@ -52,7 +52,7 @@ void MotorCtrl::setPidTunnings(double kp, double ki, double kd)
 
 void MotorCtrl::setSpeed(double reqSpeed)
 {
-    if((reqSpeed >= this->speedMin) && (reqSpeed <= this->speedMax))
+    if((reqSpeed >= this->speedMin) && (reqSpeed <= this->speedMax) && (reqSpeed != this->setpoint))
     {
         this->setpoint = reqSpeed;
         pid.SetSetpoint(this->setpoint);
@@ -61,17 +61,21 @@ void MotorCtrl::setSpeed(double reqSpeed)
 }
 void MotorCtrl::setDirection(MotorCtrl_Direction dir)
 {
-    this->direction = dir;
-    if(dir == MotCtrl_FORWARD)
+    if(dir != this->direction)
     {
-        gpioWrite(this->GPIO_IN1,1);
-        gpioWrite(this->GPIO_IN2,0);
+        this->direction = dir;
+        if(dir == MotCtrl_FORWARD)
+        {
+            gpioWrite(this->GPIO_IN1,1);
+            gpioWrite(this->GPIO_IN2,0);
+        }
+        else
+        {
+            gpioWrite(this->GPIO_IN1,0);
+            gpioWrite(this->GPIO_IN2,1);
+        }
     }
-    else
-    {
-        gpioWrite(this->GPIO_IN1,0);
-        gpioWrite(this->GPIO_IN2,1);
-    }
+    
 }
 void MotorCtrl::start(void)
 {
@@ -88,6 +92,7 @@ void MotorCtrl::start(void)
 void MotorCtrl::stop(void)
 {
     this->runFlag = false;
+    this->direction = MotCtrl_NULL;
     gpioWrite(this->GPIO_IN1,0);
     gpioWrite(this->GPIO_IN2,0);
     gpioPWM(this->GPIO_PWM,0);
@@ -142,18 +147,17 @@ void MotorCtrl::timerSample(void)
         /* compute PID */
         double out = this->pid.Compute(this->speed);
 
-        if(this->historyIdx > 100)
+        if(this->historyIdx < HISTORY_SIZE)
         {
-            this->historyIdx = 0;
+            this->historyIn[this->historyIdx] = this->speed;
+            this->historyOut[this->historyIdx] = out;
+            this->historyErr[this->historyIdx] = this->setpoint - this->speed;
+            this->historySet[this->historyIdx] = this->setpoint;
+            this->historyEnc[this->historyIdx] = this->enc_counter;
+            
+            this->historyIdx++;
         }
-        this->historyIn[this->historyIdx] = this->speed;
-        this->historyOut[this->historyIdx] = out;
-        this->historyErr[this->historyIdx] = this->setpoint - this->speed;
-        this->historySet[this->historyIdx] = this->setpoint;
-        this->historyEnc[this->historyIdx] = this->enc_counter;
         this->enc_counter = 0;
-        
-        this->historyIdx++;
 
         gpioPWM(this->GPIO_PWM,out);
     }

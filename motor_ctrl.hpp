@@ -11,8 +11,11 @@
 typedef enum MotorCtrl_Direction
 {
     MotCtrl_FORWARD = 0,
-    MotCtrl_BACKWARD = 1
+    MotCtrl_BACKWARD = 1,
+    MotCtrl_NULL
 }MotorCtrl_Direction;
+
+#define HISTORY_SIZE (200)
 
 class MotorCtrl{
     public:
@@ -43,16 +46,16 @@ class MotorCtrl{
 
         PID pid;
         int timerId;
-        MotorCtrl_Direction direction;
+        MotorCtrl_Direction direction = MotCtrl_NULL;
         volatile int enc_counter;
         volatile double speed;
         volatile double setpoint;
 
-        double historyOut[100] = {0.0};
-        double historyIn[100] = {0.0};
-        double historyErr[100] = {0.0};
-        int historyEnc[100] = {0};
-        double historySet[100] = {0};
+        double historyOut[HISTORY_SIZE] = {0.0};
+        double historyIn[HISTORY_SIZE] = {0.0};
+        double historyErr[HISTORY_SIZE] = {0.0};
+        int historyEnc[HISTORY_SIZE] = {0};
+        double historySet[HISTORY_SIZE] = {0};
         int historyIdx = 0;
         
         void encoderCbk(int gpio, int level, uint32_t tick);

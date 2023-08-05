@@ -19,13 +19,19 @@ volatile bool update = false;
 
 void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
 {
-    static double last_speed = 0;
-    static double last_x = 0;
+    static double last_speed = 0.0;
     const double speedMax = 1.5;
     bool change = false;
+
+    const double x_mid = 0.5;
+    const double x_max = 1.0;
+    const double x_dead = 0.2;
+    static double last_x = x_mid;
+
     if (ev->type == XB_EV_GAS)
     {
         last_speed = ev->val * speedMax;
+        // std::cout << "Speed: " << last_speed << std::endl; 
         change = true;
     }
     else if (ev->type == XB_EV_X_AXSIS)
@@ -33,24 +39,31 @@ void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
         change = true;
         last_x = ev->val;
     }
+    else if (ev->type == XB_EV_BREAK)
+    {
+        last_speed = -ev->val * speedMax;
+        // std::cout << "Speed: " << last_speed << std::endl; 
+        change = true;
+    }
 
     if(change)
     {
-        if(last_x < 0.01)
+        if(last_x > x_mid + x_dead)
         {
-            *s_l = last_speed * ev->val;
-            *s_r = last_speed;
-        }
-        else if(last_x > 0.01)
-        {
-            *s_r = last_speed * -ev->val;
+            *s_r = (x_max-last_x)/(x_mid - x_dead) * last_speed;
             *s_l = last_speed;
+        }
+        else if(last_x < x_mid - x_dead)
+        {
+            *s_l = (last_x)/(x_mid - x_dead) * last_speed;
+            *s_r = last_speed;
         }
         else
         {
             *s_l = last_speed;
-            *s_r = last_speed;
+            *s_r = last_speed;              
         }
+        std::cout << "CHANGE = L: " << *s_l  << " | R: " <<  *s_r << std::endl; 
     }
 }
 
@@ -74,6 +87,10 @@ int main(int argc, char* argv[]) {
 
     printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
     // Robot.move(0.5,0.5);
+    // sleep(1);
+    // Robot.stop();
+
+    // return 0;
     
     /* initialize box controller*/
     XboxController controller("/dev/input/event1");
@@ -86,15 +103,15 @@ int main(int argc, char* argv[]) {
     XB_Event xboxEvent;
     double speedLeft, speedRight = 0.0;
 
-    gpioSetTimerFunc(2,150,timer_callback);
-    
+    gpioSetTimerFunc(2,200,timer_callback);
+    bool change = false;
     // const int xboxInMax = 1.5;
     while (true)
     {
         if (controller.readEvent(xboxEvent))
         {
             // Handle the Xbox event here
-            if ((xboxEvent.type == XB_EV_GAS) || (xboxEvent.type == XB_EV_X_AXSIS))
+            if ((xboxEvent.type == XB_EV_GAS) || (xboxEvent.type == XB_EV_X_AXSIS) || (xboxEvent.type == XB_EV_BREAK))
             {
                 recalcSpeed(&speedLeft, &speedRight, &xboxEvent);
             }
@@ -103,17 +120,23 @@ int main(int argc, char* argv[]) {
                 std::cout << "Burger event! " << std::endl;
                 break;
             }
+            change = true;
         }
-
-        if(update)
+        // std::cout << "U: " << update << " | C: " <<  change << std::endl; 
+        if(update && change)
         {
             update = false;
+            change = false;
             std::cout << "L: " << speedLeft << " | R: " <<  speedRight << std::endl; 
-            // Robot.move(speedLeft,speedRight);
+            Robot.move(speedLeft,speedRight);
         }
     }
 
     Robot.stop();
+
+    
+    Robot.motorLeft.saveHistoryToCSV("motorLeftPid.csv");
+    Robot.motorRight.saveHistoryToCSV("motorRightPid.csv");
 
     Robot.kill();
     gpioTerminate();
