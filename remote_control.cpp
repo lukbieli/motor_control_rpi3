@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
             update = false;
             change = false;
             std::cout << "L: " << speedLeft << " | R: " <<  speedRight << std::endl; 
-            // Robot.move(speedLeft,speedRight);
+            Robot.move(speedLeft,speedRight);
         }
     }
 
