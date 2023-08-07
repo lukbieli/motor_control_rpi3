@@ -20,7 +20,7 @@ volatile bool update = false;
 void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
 {
     static double last_speed = 0.0;
-    const double speedMax = 1.5;
+    const double speedMax = 1.0;
     bool change = false;
 
     const double x_mid = 0.5;
@@ -63,7 +63,7 @@ void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
             *s_l = last_speed;
             *s_r = last_speed;              
         }
-        std::cout << "CHANGE = L: " << *s_l  << " | R: " <<  *s_r << std::endl; 
+        // std::cout << "CHANGE = L: " << *s_l  << " | R: " <<  *s_r << std::endl; 
     }
 }
 
@@ -83,6 +83,8 @@ int main(int argc, char* argv[]) {
     printf("Gpio OK\n");
 
     RobotMove Robot = RobotMove(0,1);
+    Robot.motorLeft.pid.SetTunings(80.0, 42.0, 0.5);
+    Robot.motorRight.pid.SetTunings(110.0, 42.0, 0.5);
     ADCCtrl Adc = ADCCtrl(PIN_ADC_CS,PIN_ADC_ADDR,PIN_ADC_IOCLK,PIN_ADC_DOUT);
 
     printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
@@ -121,6 +123,7 @@ int main(int argc, char* argv[]) {
                 break;
             }
             change = true;
+            // std::cout << "CHANGE" << std::endl;
         }
         // std::cout << "U: " << update << " | C: " <<  change << std::endl; 
         if(update && change)
@@ -128,7 +131,7 @@ int main(int argc, char* argv[]) {
             update = false;
             change = false;
             std::cout << "L: " << speedLeft << " | R: " <<  speedRight << std::endl; 
-            Robot.move(speedLeft,speedRight);
+            // Robot.move(speedLeft,speedRight);
         }
     }
 

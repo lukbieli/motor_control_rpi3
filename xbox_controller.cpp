@@ -68,6 +68,7 @@ bool XboxController::readEvent(XB_Event &xboxEvent)
             {
                 xboxEvent.type = XB_EV_GAS;
                 xboxEvent.val = (double)ev.value/(double)this->gas_max;
+                // std::cout << "EV_GAS" << std::endl;
                 return true;
             }
             else if (ev.code == 0) /* X_AXSIS */
@@ -89,14 +90,17 @@ bool XboxController::readEvent(XB_Event &xboxEvent)
                 //     return true;                    
                 // }
                 xboxEvent.val = (double)ev.value/(double)this->x_max;
+                // std::cout << "EV_X" << std::endl;
                 return true; 
             }
             else if(ev.code == 10) /* BREAK */
             {
                 xboxEvent.type = XB_EV_BREAK;
                 xboxEvent.val = (double)ev.value/(double)this->gas_max;
+                // std::cout << "EV_BR" << std::endl;
                 return true;
             }
+            // std::cout << "ELSE " << ev.code <<  std::endl;
         }
         else if(ev.type == EV_MSC)
         {

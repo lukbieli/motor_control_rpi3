@@ -32,7 +32,7 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
 
     /* PID setup*/
     this->pid.Reset();
-    this->pid.SetTunings(24.0,55.0,1.0); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 | 110.0 42.0 0.5*/
+    this->pid.SetTunings(90.0, 42.0, 0.5); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 | 24.0,55.0,1.0 | 110.0, 42.0, 0.5*/
     this->pid.SetOutputLimits(0.0,255.0);
     this->pid.SetMode(AUTOMATIC);
     // this->pid.SetSetpoint(1.5);
