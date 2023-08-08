@@ -16,6 +16,7 @@
 /* run: sudo ./remote_control */
 
 volatile bool update = false;
+volatile bool flag_1s = false;
 
 void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
 {
@@ -72,6 +73,11 @@ void timer_callback(void)
     update = true;
 }
 
+void timer1s_callback(void)
+{
+    flag_1s = true;
+}
+
 int main(int argc, char* argv[]) {
 
     printf("AlphaBot Pi3 remote control start!\n");
@@ -106,6 +112,7 @@ int main(int argc, char* argv[]) {
     double speedLeft, speedRight = 0.0;
 
     gpioSetTimerFunc(2,200,timer_callback);
+    gpioSetTimerFunc(3,1000,timer1s_callback);
     bool change = false;
     // const int xboxInMax = 1.5;
     while (true)
@@ -132,6 +139,12 @@ int main(int argc, char* argv[]) {
             change = false;
             std::cout << "L: " << speedLeft << " | R: " <<  speedRight << std::endl; 
             Robot.move(speedLeft,speedRight);
+        }
+
+        if(flag_1s)
+        {
+            flag_1s = false;
+            Adc.checkProximity();
         }
     }
 

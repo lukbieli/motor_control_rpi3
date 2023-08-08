@@ -6,7 +6,8 @@ class ADCCtrl{
         ADCCtrl(const int pin_cs, const int pin_addr, const int pin_ioclk, const int pin_dout);
 
         double readBatteryVoltage(void);
-        
+        void checkProximity(void);
+
     private:
         int PIN_CS;
         int PIN_ADDR;
@@ -14,6 +15,8 @@ class ADCCtrl{
         int PIN_DOUT;
 
         const int ADC_VIN = 10;
+        const int ADC_OBS_L = 8;
+        const int ADC_OBS_R = 9;
 
         unsigned int readADC(unsigned int channel);
 };

@@ -30,6 +30,14 @@ double ADCCtrl::readBatteryVoltage(void)
     return batteryVolt;
 }
 
+void ADCCtrl::checkProximity(void)
+{
+    unsigned int obs_l = readADC(this->ADC_OBS_L);
+    unsigned int obs_r = readADC(this->ADC_OBS_R);
+
+    printf("OBS | L: %d  R: %d\n",obs_l,obs_r);
+}
+
 unsigned ADCCtrl::readADC(unsigned channel) {
 	// if (!running) return 0;
 	unsigned us = 1;
