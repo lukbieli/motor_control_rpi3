@@ -124,6 +124,11 @@ int main(int argc, char* argv[]) {
                 std::cout << "Burger event! " << std::endl;
                 break;
             }
+            else if (xboxEvent.type == XB_EV_SQUARE)
+            {
+                printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
+                break;
+            }
             change = true;
             // std::cout << "CHANGE" << std::endl;
         }

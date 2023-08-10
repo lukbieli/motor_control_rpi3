@@ -104,9 +104,17 @@ bool XboxController::readEvent(XB_Event &xboxEvent)
         }
         else if(ev.type == EV_MSC)
         {
-            if(ev.code == 4 && ev.value == 589832)
+            if(ev.code == 4 && ev.value == 0x90008)
             {
                 xboxEvent.type = XB_EV_BURGER;
+                return true;
+            }
+        }
+        else if(ev.type == EV_MSC)
+        {
+            if(ev.code == 4 && ev.value == 0x90007)
+            {
+                xboxEvent.type = XB_EV_SQUARE;
                 return true;
             }
         }
