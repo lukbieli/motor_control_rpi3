@@ -89,8 +89,8 @@ int main(int argc, char* argv[]) {
     printf("Gpio OK\n");
 
     RobotMove Robot = RobotMove(0,1);
-    Robot.motorLeft.pid.SetTunings(80.0, 42.0, 0.5);
-    Robot.motorRight.pid.SetTunings(110.0, 42.0, 0.5);
+    // Robot.motorLeft.pid.SetTunings(80.0, 42.0, 0.5);
+    // Robot.motorRight.pid.SetTunings(110.0, 42.0, 0.5);
     ADCCtrl Adc = ADCCtrl(PIN_ADC_CS,PIN_ADC_ADDR,PIN_ADC_IOCLK,PIN_ADC_DOUT);
 
     printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
