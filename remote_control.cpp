@@ -16,7 +16,7 @@
 /* run: sudo ./remote_control */
 
 volatile bool update = false;
-volatile bool flag_1s = false;
+volatile bool flag_100ms = false;
 
 void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
 {
@@ -73,9 +73,9 @@ void timer_callback(void)
     update = true;
 }
 
-void timer1s_callback(void)
+void timer100ms_callback(void)
 {
-    flag_1s = true;
+    flag_100ms = true;
 }
 
 int main(int argc, char* argv[]) {
@@ -109,13 +109,14 @@ int main(int argc, char* argv[]) {
     gpioSetTimerFunc(2,200,timer_callback);
     gpioSetTimerFunc(3,1000,timer1s_callback);
     bool change = false;
+    int commandTimeout = 0;
     // const int xboxInMax = 1.5;
     while (true)
     {
         if (controller.readEvent(xboxEvent))
         {
             // Handle the Xbox event here
-            if ((xboxEvent.type == XB_EV_GAS) || (xboxEvent.type == XB_EV_X_AXSIS) || (xboxEvent.type == XB_EV_BREAK))
+            if ((xboxEvent.type == XB_EV_GAS) || (xboxEvent.type == XB_EV_X_AXSIS) || (xboxEvent.type == XB_EV_BREAK) || (xboxEvent.type == XB_EV_SQUARE))
             {
                 recalcSpeed(&speedLeft, &speedRight, &xboxEvent);
             }
@@ -137,13 +138,18 @@ int main(int argc, char* argv[]) {
         {
             update = false;
             change = false;
+            commandTimeout = 0;
             std::cout << "L: " << speedLeft << " | R: " <<  speedRight << std::endl; 
             Robot.move(speedLeft,speedRight);
         }
 
-        if(flag_1s)
+        if(flag_100ms)
         {
-            flag_1s = false;
+            flag_100ms = false;
+            if(commandTimeout++ > 20)
+            {
+                Robot.move(0,0);
+            }
             // unsigned int l = Adc.checkProximityL();
             // unsigned int r = Adc.checkProximityR();
             // std::cout << "PROX: L: " << l << " | R: " <<  r << std::endl; 
