@@ -94,11 +94,6 @@ int main(int argc, char* argv[]) {
     ADCCtrl Adc = ADCCtrl(PIN_ADC_CS,PIN_ADC_ADDR,PIN_ADC_IOCLK,PIN_ADC_DOUT);
 
     printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
-    // Robot.move(0.5,0.5);
-    // sleep(1);
-    // Robot.stop();
-
-    // return 0;
     
     /* initialize box controller*/
     XboxController controller("/dev/input/event1");
@@ -144,7 +139,9 @@ int main(int argc, char* argv[]) {
         if(flag_1s)
         {
             flag_1s = false;
-            Adc.checkProximity();
+            // unsigned int l = Adc.checkProximityL();
+            // unsigned int r = Adc.checkProximityR();
+            // std::cout << "PROX: L: " << l << " | R: " <<  r << std::endl; 
         }
     }
 
