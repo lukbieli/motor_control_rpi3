@@ -11,7 +11,7 @@
 #include "xbox_controller.hpp"
 
 /* Single control */
-/* g++ -Wall -pthread -o remote_control ../remote_control.cpp ../pid.cpp ../adc.cpp ../motor_ctrl.cpp ../robot_move.cpp ../xbox_controller.cpp -I/usr/include/libevdev-1.0 -levdev -lpigpio -lrt -lc -g */
+/* g++ -Wall -pthread -o remote_control ../remote_control.cpp ../pid.cpp ../adc.cpp ../motor_ctrl.cpp ../robot_move.cpp ../xbox_controller.cpp ../rotary_encoder.cpp -I/usr/include/libevdev-1.0 -levdev -lpigpio -lrt -lc -g */
 
 /* run: sudo ./remote_control */
 
@@ -21,7 +21,7 @@ volatile bool flag_1s = false;
 void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
 {
     static double last_speed = 0.0;
-    const double speedMax = 1.0;
+    const double speedMax = 0.5;
     bool change = false;
 
     const double x_mid = 0.5;

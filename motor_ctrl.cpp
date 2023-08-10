@@ -5,7 +5,7 @@
 #include <pigpio.h>
 #include <unistd.h>
 
-void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC1, const unsigned int PIN_ENC2, const int timerNum)
+MotorCtrl::MotorCtrl(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC1, const unsigned int PIN_ENC2, const int timerNum) : enc(PIN_ENC1,PIN_ENC2,this->encoderICbkExt,this)
 {
     this->GPIO_PWM = PIN_PWM;
     this->GPIO_IN1 = PIN_IN1;
@@ -25,7 +25,7 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
     gpioSetPWMfrequency(this->GPIO_PWM,1000);
     
     /* setup encoders input */
-    this->encoder(this->GPIO_ENC1,this->GPIO_ENC2,this->encoderICbk);
+    // this->encoder(this->GPIO_ENC1,this->GPIO_ENC2,this->encoderICbkExt);
     // gpioSetMode(this->GPIO_ENC, PI_INPUT);
     // gpioSetPullUpDown(this->GPIO_ENC, PI_PUD_UP);
     /* monitor encoder level changes */
@@ -34,7 +34,8 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
 
     /* PID setup*/
     this->pid.Reset();
-    this->pid.SetTunings(90.0, 42.0, 0.5); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 | 24.0,55.0,1.0 | 110.0, 42.0, 0.5*/
+    // this->pid.SetTunings(90.0, 42.0, 0.5); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 | 24.0,55.0,1.0 | 110.0, 42.0, 0.5*/ // for Aplhabot originalmotors
+    this->pid.SetTunings(600.0, 120.0, 10.0); /* for pololu motors */
     this->pid.SetOutputLimits(0.0,255.0);
     this->pid.SetMode(AUTOMATIC);
     // this->pid.SetSetpoint(1.5);
@@ -118,7 +119,18 @@ void MotorCtrl::forcePwm(int pwm)
 
 void MotorCtrl::encoderICbk(int way)
 {
-    this->enc_counter += way;
+    this->enc_counter++;//+= way;
+}
+
+void MotorCtrl::encoderICbkExt(int way, void *user)
+{
+   /*
+      Need a static callback to link with C.
+   */
+
+   MotorCtrl *mySelf = (MotorCtrl *) user;
+
+   mySelf->encoderICbk(way); /* Call the instance callback. */
 }
 
 // void MotorCtrl::encoderCbk(int gpio, int level, uint32_t tick)
@@ -137,6 +149,7 @@ void MotorCtrl::encoderICbk(int way)
 //    mySelf->encoderCbk(gpio, level, tick); /* Call the instance callback. */
 // }
 
+
 void MotorCtrl::timerSample(void)
 {
     // static int i = 0;
@@ -145,7 +158,7 @@ void MotorCtrl::timerSample(void)
     {
         if(this->enc_counter > 0)
         {
-            double rps_l = ((double)this->enc_counter/20.0)/(samplingRateS);
+            double rps_l = ((double)this->enc_counter/this->encoder_ppr)/(samplingRateS);
             this->speed = (wheel_circ * rps_l)/1000.0; /* in m/s*/
         }
         else

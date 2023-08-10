@@ -1,40 +1,37 @@
-#ifndef B0DF20E6_3DFE_4919_B384_39F959EB623A
-#define B0DF20E6_3DFE_4919_B384_39F959EB623A
 #ifndef ROTARY_ENCODER_HPP
 #define ROTARY_ENCODER_HPP
 
 #include <stdint.h>
 
-typedef void (*re_decoderCB_t)(int);
+typedef void (*encoderCB_t)(int,void*);
 
-class re_decoder
+class encoder
 {
-   int mygpioA, mygpioB, levA, levB, lastGpio;
+    private:
+        int mygpioA, mygpioB, levA, levB, lastGpio;
 
-   re_decoderCB_t mycallback;
+        encoderCB_t mycallback;
+        void* userData;
 
-   void _pulse(int gpio, int level, uint32_t tick);
+        void _pulse(int gpio, int level, uint32_t tick);
 
-   /* Need a static callback to link with C. */
-   static void _pulseEx(int gpio, int level, uint32_t tick, void *user);
+        /* Need a static callback to link with C. */
+        static void _pulseEx(int gpio, int level, uint32_t tick, void *user);
 
 
    public:
 
-   re_decoder(int gpioA, int gpioB, re_decoderCB_t callback);
-   /*
-      This function establishes a rotary encoder on gpioA and gpioB.
+        encoder(int gpioA, int gpioB, encoderCB_t callback, void* user);
+        /*
+            This function establishes a rotary encoder on gpioA and gpioB.
 
-      When the encoder is turned the callback function is called.
-   */
+            When the encoder is turned the callback function is called.
+        */
 
-   void re_cancel(void);
-   /*
-      This function releases the resources used by the decoder.
-   */
+        void re_cancel(void);
+        /*
+            This function releases the resources used by the decoder.
+        */
 };
 
 #endif
-
-
-#endif /* B0DF20E6_3DFE_4919_B384_39F959EB623A */

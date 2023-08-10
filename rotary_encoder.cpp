@@ -20,7 +20,7 @@
 
 */
 
-void re_decoder::_pulse(int gpio, int level, uint32_t tick)
+void encoder::_pulse(int gpio, int level, uint32_t tick)
 {
    if (gpio == mygpioA) levA = level; else levB = level;
 
@@ -30,30 +30,31 @@ void re_decoder::_pulse(int gpio, int level, uint32_t tick)
 
       if ((gpio == mygpioA) && (level == 1))
       {
-         if (levB) (mycallback)(1);
+         if (levB) (mycallback)(1,userData);
       }
       else if ((gpio == mygpioB) && (level == 1))
       {
-         if (levA) (mycallback)(-1);
+         if (levA) (mycallback)(-1,userData);
       }
    }
 }
 
-void re_decoder::_pulseEx(int gpio, int level, uint32_t tick, void *user)
+void encoder::_pulseEx(int gpio, int level, uint32_t tick, void *user)
 {
    /*
       Need a static callback to link with C.
    */
 
-   re_decoder *mySelf = (re_decoder *) user;
+   encoder *mySelf = (encoder *) user;
 
    mySelf->_pulse(gpio, level, tick); /* Call the instance callback. */
 }
 
-re_decoder::re_decoder(int gpioA, int gpioB, re_decoderCB_t callback)
+encoder::encoder(int gpioA, int gpioB, encoderCB_t callback, void* user)
 {
    mygpioA = gpioA;
    mygpioB = gpioB;
+   userData= user;
 
    mycallback = callback;
 
@@ -76,7 +77,7 @@ re_decoder::re_decoder(int gpioA, int gpioB, re_decoderCB_t callback)
    gpioSetAlertFuncEx(gpioB, _pulseEx, this);
 }
 
-void re_decoder::re_cancel(void)
+void encoder::re_cancel(void)
 {
    gpioSetAlertFuncEx(mygpioA, 0, this);
    gpioSetAlertFuncEx(mygpioB, 0, this);

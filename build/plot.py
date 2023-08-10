@@ -64,7 +64,9 @@ def plot_data_to_png(dataL, dataR,filename):
 def main():
     parser = argparse.ArgumentParser(description='Generate a plot and save it to a PNG file.')
     parser.add_argument('filename', type=str, help='Name of the PNG file to be created')
+    parser.add_argument('--limit', type=int, default=None, help='Limit the number of rows to read from files')
     args = parser.parse_args()
+
     # Read the CSV file into lists
     columns = []
     dataL = { 'OUT': [], 'ENC': [], 'IN': [], 'SET': [] }
@@ -74,7 +76,10 @@ def main():
         header = file_l.readline().strip().split(',')
         columns = [col.strip() for col in header]
 
-        for line in file_l:
+        for i, line in enumerate(file_l):
+            if args.limit is not None and i >= args.limit:
+                break
+
             values = line.strip().split(',')
             dataL['OUT'].append(float(values[0]))
             dataL['ENC'].append(int(values[1]))
@@ -85,14 +90,17 @@ def main():
         header = file_r.readline().strip().split(',')
         columns = [col.strip() for col in header]
 
-        for line in file_r:
+        for i, line in enumerate(file_r):
+            if args.limit is not None and i >= args.limit:
+                break
+
             values = line.strip().split(',')
             dataR['OUT'].append(float(values[0]))
             dataR['ENC'].append(int(values[1]))
             dataR['IN'].append(float(values[2]))
             dataR['SET'].append(float(values[3]))
 
-    plot_data_to_png(dataL,dataR,args.filename)
+    plot_data_to_png(dataL, dataR, args.filename)
 
 if __name__ == '__main__':
     main()

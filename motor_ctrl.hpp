@@ -20,7 +20,7 @@ typedef enum MotorCtrl_Direction
 
 class MotorCtrl{
     public:
-        void config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC, const int timerNum);
+        MotorCtrl(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC1, const unsigned int PIN_ENC2, const int timerNum);
         void setSpeed(double speed);
         void setDirection(MotorCtrl_Direction dir);
         void start(void); /* starts sampling */
@@ -33,6 +33,7 @@ class MotorCtrl{
         void setPidTunnings(double kp, double ki, double kd);
         
         PID pid;
+        volatile int enc_counter;
 
     private:
 
@@ -43,15 +44,16 @@ class MotorCtrl{
         unsigned int GPIO_ENC2 = 0;
         const double wheel_diam = 65.0; /* diameter in mm */
         const double wheel_circ = wheel_diam * M_PI; /* wheel circuit */
-        const int samplingRate = 100; /* encoder + pid sampling rate*/
+        const int samplingRate = 20; /* encoder + pid sampling rate*/
         const double samplingRateS = (double)samplingRate/1000.0; /* encoder + pid sampling rate*/
+        const double encoder_ppr = 350.0; /* number of encoder pulses per full rotation */
         const double speedMin = 0; /* minimum speed in m/s */
-        const double speedMax = 5.0; /* maximal speed in m/s */
+        const double speedMax = 0.6; /* maximal speed in m/s */
 
         int timerId;
         MotorCtrl_Direction direction = MotCtrl_NULL;
-        re_decoder encoder;
-        volatile int enc_counter;
+        encoder enc;
+        // volatile int enc_counter;
         volatile double speed;
         volatile double setpoint;
 
@@ -64,7 +66,8 @@ class MotorCtrl{
         
         // void encoderCbk(int gpio, int level, uint32_t tick);
         // static void encoderCbkExt(int gpio, int level, uint32_t tick, void *user);
-        void MotorCtrl::encoderICbk(int way);
+        void encoderICbk(int way);
+        static void encoderICbkExt(int way, void *user);
         void timerSample(void);
         static void timerSampleExt(void *user);
         int mode = 0;
