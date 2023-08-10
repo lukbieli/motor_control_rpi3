@@ -5,12 +5,13 @@
 #include <pigpio.h>
 #include <unistd.h>
 
-void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC, const int timerNum)
+void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC1, const unsigned int PIN_ENC2, const int timerNum)
 {
     this->GPIO_PWM = PIN_PWM;
     this->GPIO_IN1 = PIN_IN1;
     this->GPIO_IN2 = PIN_IN2;
-    this->GPIO_ENC = PIN_ENC;
+    this->GPIO_ENC1 = PIN_ENC1;
+    this->GPIO_ENC2 = PIN_ENC2;
 
     /* prepare gpio */
 
@@ -24,11 +25,12 @@ void MotorCtrl::config(const unsigned int PIN_PWM, const unsigned int PIN_IN1, c
     gpioSetPWMfrequency(this->GPIO_PWM,1000);
     
     /* setup encoders input */
-    gpioSetMode(this->GPIO_ENC, PI_INPUT);
-    gpioSetPullUpDown(this->GPIO_ENC, PI_PUD_UP);
+    this->encoder(this->GPIO_ENC1,this->GPIO_ENC2,this->encoderICbk);
+    // gpioSetMode(this->GPIO_ENC, PI_INPUT);
+    // gpioSetPullUpDown(this->GPIO_ENC, PI_PUD_UP);
     /* monitor encoder level changes */
     this->enc_counter = 0;
-    gpioSetAlertFuncEx(this->GPIO_ENC, this->encoderCbkExt, (void*)this);
+    // gpioSetAlertFuncEx(this->GPIO_ENC, this->encoderCbkExt, (void*)this);
 
     /* PID setup*/
     this->pid.Reset();
@@ -66,13 +68,13 @@ void MotorCtrl::setDirection(MotorCtrl_Direction dir)
         this->direction = dir;
         if(dir == MotCtrl_FORWARD)
         {
-            gpioWrite(this->GPIO_IN1,1);
-            gpioWrite(this->GPIO_IN2,0);
+            gpioWrite(this->GPIO_IN1,0);
+            gpioWrite(this->GPIO_IN2,1);
         }
         else
         {
-            gpioWrite(this->GPIO_IN1,0);
-            gpioWrite(this->GPIO_IN2,1);
+            gpioWrite(this->GPIO_IN1,1);
+            gpioWrite(this->GPIO_IN2,0);
         }
     }
     
@@ -114,21 +116,26 @@ void MotorCtrl::forcePwm(int pwm)
     gpioPWM(this->GPIO_PWM,pwm);
 }
 
-void MotorCtrl::encoderCbk(int gpio, int level, uint32_t tick)
+void MotorCtrl::encoderICbk(int way)
 {
-    this->enc_counter++;
+    this->enc_counter += way;
 }
 
-void MotorCtrl::encoderCbkExt(int gpio, int level, uint32_t tick, void *user)
-{
-   /*
-      Need a static callback to link with C.
-   */
+// void MotorCtrl::encoderCbk(int gpio, int level, uint32_t tick)
+// {
+//     this->enc_counter++;
+// }
 
-   MotorCtrl *mySelf = (MotorCtrl *) user;
+// void MotorCtrl::encoderCbkExt(int gpio, int level, uint32_t tick, void *user)
+// {
+//    /*
+//       Need a static callback to link with C.
+//    */
 
-   mySelf->encoderCbk(gpio, level, tick); /* Call the instance callback. */
-}
+//    MotorCtrl *mySelf = (MotorCtrl *) user;
+
+//    mySelf->encoderCbk(gpio, level, tick); /* Call the instance callback. */
+// }
 
 void MotorCtrl::timerSample(void)
 {

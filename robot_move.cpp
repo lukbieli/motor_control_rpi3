@@ -4,16 +4,18 @@
 #include "alphabot_cfg.h"
 
 // Constructor implementation
-RobotMove::RobotMove(int timerId1, int timerId2) {
+RobotMove::RobotMove(int timerId1, int timerId2)
+{
     // Add any necessary initialization code here
-    this->motorLeft.config(PIN_MOTORL_EN,PIN_HBRIDGE_IN1,PIN_HBRIDGE_IN2,PIN_ENC_L,timerId1);
-    this->motorRight.config(PIN_MOTORR_EN,PIN_HBRIDGE_IN4,PIN_HBRIDGE_IN3,PIN_ENC_R,timerId2);
+    this->motorLeft.config(PIN_MOTORL_EN,PIN_HBRIDGE_IN1,PIN_HBRIDGE_IN2,PIN_ENC_L1,PIN_ENC_L2,,timerId1);
+    this->motorRight.config(PIN_MOTORR_EN,PIN_HBRIDGE_IN4,PIN_HBRIDGE_IN3,PIN_ENC_R1,PIN_ENC_R2,timerId2);
     this->motorLeft.start();
     this->motorRight.start();
 }
 
 // Method to move the robot implementation
-void RobotMove::move(double left, double right) {
+void RobotMove::move(double left, double right)
+{
     // Add code to control the robot's left and right motors here
     if(left > 0.0)
     {

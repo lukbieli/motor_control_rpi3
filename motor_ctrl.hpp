@@ -7,6 +7,7 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#include "rotary_encoder.hpp"
 
 typedef enum MotorCtrl_Direction
 {
@@ -38,7 +39,8 @@ class MotorCtrl{
         unsigned int GPIO_PWM;
         unsigned int GPIO_IN1 = 0;
         unsigned int GPIO_IN2 = 0;
-        unsigned int GPIO_ENC = 0;
+        unsigned int GPIO_ENC1 = 0;
+        unsigned int GPIO_ENC2 = 0;
         const double wheel_diam = 65.0; /* diameter in mm */
         const double wheel_circ = wheel_diam * M_PI; /* wheel circuit */
         const int samplingRate = 100; /* encoder + pid sampling rate*/
@@ -48,6 +50,7 @@ class MotorCtrl{
 
         int timerId;
         MotorCtrl_Direction direction = MotCtrl_NULL;
+        re_decoder encoder;
         volatile int enc_counter;
         volatile double speed;
         volatile double setpoint;
@@ -59,8 +62,9 @@ class MotorCtrl{
         double historySet[HISTORY_SIZE] = {0};
         int historyIdx = 0;
         
-        void encoderCbk(int gpio, int level, uint32_t tick);
-        static void encoderCbkExt(int gpio, int level, uint32_t tick, void *user);
+        // void encoderCbk(int gpio, int level, uint32_t tick);
+        // static void encoderCbkExt(int gpio, int level, uint32_t tick, void *user);
+        void MotorCtrl::encoderICbk(int way);
         void timerSample(void);
         static void timerSampleExt(void *user);
         int mode = 0;
