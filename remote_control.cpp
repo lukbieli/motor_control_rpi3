@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
     
     /* initialize box controller*/
-    XboxController controller("/dev/input/event1");
+    XboxController controller("/dev/input/event0");
     if (!controller.isValid())
     {
         std::cerr << "Failed to initialize the Xbox controller." << std::endl;
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
     double speedLeft, speedRight = 0.0;
 
     gpioSetTimerFunc(2,200,timer_callback);
-    gpioSetTimerFunc(3,1000,timer1s_callback);
+    gpioSetTimerFunc(3,100,timer100ms_callback);
     bool change = false;
     int commandTimeout = 0;
     // const int xboxInMax = 1.5;
@@ -116,7 +116,7 @@ int main(int argc, char* argv[]) {
         if (controller.readEvent(xboxEvent))
         {
             // Handle the Xbox event here
-            if ((xboxEvent.type == XB_EV_GAS) || (xboxEvent.type == XB_EV_X_AXSIS) || (xboxEvent.type == XB_EV_BREAK) || (xboxEvent.type == XB_EV_SQUARE))
+            if ((xboxEvent.type == XB_EV_GAS) || (xboxEvent.type == XB_EV_X_AXSIS) || (xboxEvent.type == XB_EV_BREAK))
             {
                 recalcSpeed(&speedLeft, &speedRight, &xboxEvent);
             }
