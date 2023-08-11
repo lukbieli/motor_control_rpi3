@@ -5,7 +5,13 @@
 #include <pigpio.h>
 #include <unistd.h>
 
+#if defined(HW_N20D)
 MotorCtrl::MotorCtrl(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC1, const unsigned int PIN_ENC2, const int timerNum) : enc(PIN_ENC1,PIN_ENC2,this->encoderICbkExt,this)
+#elif defined(HW_ORIGINAL)
+MotorCtrl::MotorCtrl(const unsigned int PIN_PWM, const unsigned int PIN_IN1, const unsigned int PIN_IN2, const unsigned int PIN_ENC1, const int timerNum)
+#else
+    #error "Must select HW configuration!"
+#endif
 {
     this->GPIO_PWM = PIN_PWM;
     this->GPIO_IN1 = PIN_IN1;
@@ -25,20 +31,25 @@ MotorCtrl::MotorCtrl(const unsigned int PIN_PWM, const unsigned int PIN_IN1, con
     gpioSetPWMfrequency(this->GPIO_PWM,1000);
     
     /* setup encoders input */
-    // this->encoder(this->GPIO_ENC1,this->GPIO_ENC2,this->encoderICbkExt);
-    // gpioSetMode(this->GPIO_ENC, PI_INPUT);
-    // gpioSetPullUpDown(this->GPIO_ENC, PI_PUD_UP);
-    /* monitor encoder level changes */
     this->enc_counter = 0;
-    // gpioSetAlertFuncEx(this->GPIO_ENC, this->encoderCbkExt, (void*)this);
+#if defined(HW_ORIGINAL)
+    gpioSetMode(this->GPIO_ENC1, PI_INPUT);
+    gpioSetPullUpDown(this->GPIO_ENC1, PI_PUD_UP);
+    /* monitor encoder level changes */
+    gpioSetAlertFuncEx(this->GPIO_ENC1, this->encoderCbkExt, (void*)this);
+#endif
 
     /* PID setup*/
     this->pid.Reset();
-    // this->pid.SetTunings(90.0, 42.0, 0.5); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 | 24.0,55.0,1.0 | 110.0, 42.0, 0.5*/ // for Aplhabot originalmotors
-    this->pid.SetTunings(600.0, 120.0, 10.0); /* for pololu motors */
+#if defined(HW_N20D)
+    this->pid.SetTunings(600.0, 120.0, 10.0); /* for N20D motors */
+#elif defined(HW_ORIGINAL)
+    this->pid.SetTunings(90.0, 42.0, 0.5); /* 15.0,13.0,0.0 | 34.0,28.0,0.5 | 24.0,55.0,1.0 | 110.0, 42.0, 0.5*/ // for Alphabot original motors
+#else
+    #error "Must select HW configuration!"
+#endif
     this->pid.SetOutputLimits(0.0,255.0);
     this->pid.SetMode(AUTOMATIC);
-    // this->pid.SetSetpoint(1.5);
     this->pid.SetSampleTime(this->samplingRate);
 
     /* enable sampling timer */
@@ -116,7 +127,7 @@ void MotorCtrl::forcePwm(int pwm)
     }
     gpioPWM(this->GPIO_PWM,pwm);
 }
-
+#if defined(HW_N20D)
 void MotorCtrl::encoderICbk(int way)
 {
     this->enc_counter++;//+= way;
@@ -132,23 +143,25 @@ void MotorCtrl::encoderICbkExt(int way, void *user)
 
    mySelf->encoderICbk(way); /* Call the instance callback. */
 }
+#elif defined(HW_ORIGINAL)
+void MotorCtrl::encoderCbk(int gpio, int level, uint32_t tick)
+{
+    this->enc_counter++;
+}
 
-// void MotorCtrl::encoderCbk(int gpio, int level, uint32_t tick)
-// {
-//     this->enc_counter++;
-// }
+void MotorCtrl::encoderCbkExt(int gpio, int level, uint32_t tick, void *user)
+{
+   /*
+      Need a static callback to link with C.
+   */
 
-// void MotorCtrl::encoderCbkExt(int gpio, int level, uint32_t tick, void *user)
-// {
-//    /*
-//       Need a static callback to link with C.
-//    */
+   MotorCtrl *mySelf = (MotorCtrl *) user;
 
-//    MotorCtrl *mySelf = (MotorCtrl *) user;
-
-//    mySelf->encoderCbk(gpio, level, tick); /* Call the instance callback. */
-// }
-
+   mySelf->encoderCbk(gpio, level, tick); /* Call the instance callback. */
+}
+#else
+    #error "Must select HW configuration!"
+#endif
 
 void MotorCtrl::timerSample(void)
 {
