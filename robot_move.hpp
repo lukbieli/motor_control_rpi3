@@ -5,7 +5,7 @@
 
 class RobotMove {
     public:
-        // Constructor without arguments
+        // Constructor
         RobotMove(int timer1, int timer2);
 
         // Public method to move the robot

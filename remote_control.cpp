@@ -11,17 +11,17 @@
 #include "xbox_controller.hpp"
 
 /* Single control */
-/* g++ -Wall -pthread -o remote_control ../remote_control.cpp ../pid.cpp ../adc.cpp ../motor_ctrl.cpp ../robot_move.cpp ../xbox_controller.cpp -I/usr/include/libevdev-1.0 -levdev -lpigpio -lrt -lc -g */
+/* g++ -Wall -pthread -o remote_control ../remote_control.cpp ../pid.cpp ../adc.cpp ../motor_ctrl.cpp ../robot_move.cpp ../xbox_controller.cpp ../rotary_encoder.cpp -I/usr/include/libevdev-1.0 -levdev -lpigpio -lrt -lc -g */
 
 /* run: sudo ./remote_control */
 
 volatile bool update = false;
-volatile bool flag_1s = false;
+volatile bool flag_100ms = false;
 
 void recalcSpeed(double* s_l, double* s_r, XB_Event* ev)
 {
     static double last_speed = 0.0;
-    const double speedMax = 1.0;
+    const double speedMax = 0.5;
     bool change = false;
 
     const double x_mid = 0.5;
@@ -73,9 +73,9 @@ void timer_callback(void)
     update = true;
 }
 
-void timer1s_callback(void)
+void timer100ms_callback(void)
 {
-    flag_1s = true;
+    flag_100ms = true;
 }
 
 int main(int argc, char* argv[]) {
@@ -89,14 +89,14 @@ int main(int argc, char* argv[]) {
     printf("Gpio OK\n");
 
     RobotMove Robot = RobotMove(0,1);
-    Robot.motorLeft.pid.SetTunings(80.0, 42.0, 0.5);
-    Robot.motorRight.pid.SetTunings(110.0, 42.0, 0.5);
+    // Robot.motorLeft.pid.SetTunings(80.0, 42.0, 0.5);
+    // Robot.motorRight.pid.SetTunings(110.0, 42.0, 0.5);
     ADCCtrl Adc = ADCCtrl(PIN_ADC_CS,PIN_ADC_ADDR,PIN_ADC_IOCLK,PIN_ADC_DOUT);
 
     printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
     
     /* initialize box controller*/
-    XboxController controller("/dev/input/event1");
+    XboxController controller("/dev/input/event0");
     if (!controller.isValid())
     {
         std::cerr << "Failed to initialize the Xbox controller." << std::endl;
@@ -107,8 +107,9 @@ int main(int argc, char* argv[]) {
     double speedLeft, speedRight = 0.0;
 
     gpioSetTimerFunc(2,200,timer_callback);
-    gpioSetTimerFunc(3,1000,timer1s_callback);
+    gpioSetTimerFunc(3,100,timer100ms_callback);
     bool change = false;
+    int commandTimeout = 0;
     // const int xboxInMax = 1.5;
     while (true)
     {
@@ -124,6 +125,11 @@ int main(int argc, char* argv[]) {
                 std::cout << "Burger event! " << std::endl;
                 break;
             }
+            else if (xboxEvent.type == XB_EV_SQUARE)
+            {
+                printf("Battery volt: %.2f\n", Adc.readBatteryVoltage());
+                break;
+            }
             change = true;
             // std::cout << "CHANGE" << std::endl;
         }
@@ -132,13 +138,18 @@ int main(int argc, char* argv[]) {
         {
             update = false;
             change = false;
+            commandTimeout = 0;
             std::cout << "L: " << speedLeft << " | R: " <<  speedRight << std::endl; 
             Robot.move(speedLeft,speedRight);
         }
 
-        if(flag_1s)
+        if(flag_100ms)
         {
-            flag_1s = false;
+            flag_100ms = false;
+            if(commandTimeout++ > 20)
+            {
+                Robot.move(0,0);
+            }
             // unsigned int l = Adc.checkProximityL();
             // unsigned int r = Adc.checkProximityR();
             // std::cout << "PROX: L: " << l << " | R: " <<  r << std::endl; 

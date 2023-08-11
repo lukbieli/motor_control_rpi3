@@ -10,7 +10,7 @@
 #include "alphabot_cfg.h"
 
 /* Single control */
-/* g++ -Wall -pthread -o single_control ../single_control.cpp ../pid.cpp ../adc.cpp ../motor_ctrl.cpp ../robot_move.cpp -lpigpio -lrt -lc -g */
+/* g++ -Wall -pthread -o single_control ../single_control.cpp ../pid.cpp ../adc.cpp ../motor_ctrl.cpp ../robot_move.cpp ../rotary_encoder.cpp -lpigpio -lrt -lc -g */
 
 /* run: sudo ./single_control -a 0.5 0.5 4 -c 24.0 55.7 0.9 -t 2 */
 /* to plot: python plot.py plot.png*/
@@ -160,6 +160,7 @@ int main(int argc, char* argv[]) {
         Robot.motorRight.printHistory(10);
         Robot.motorRight.saveHistoryToCSV("motorRightPid.csv");
     }
+    printf("ENC_L: %d | ENC_R: %d\n",Robot.motorLeft.enc_counter,Robot.motorRight.enc_counter);
     Robot.kill();
     gpioTerminate();
     return 0;
