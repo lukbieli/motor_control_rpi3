@@ -9,6 +9,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Set the path to the directory containing FindPigpio.cmake
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
+# Set the build type to Debug by default
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
 # Add your common source files
 set(COMMON_SOURCES
     adc.cpp
@@ -80,6 +85,12 @@ target_include_directories(single_control PRIVATE
 # Specify any additional compiler flags for both targets
 target_compile_options(remote_control PRIVATE -Wall)
 target_compile_options(single_control PRIVATE -Wall)
+
+# Set debug flags for the Debug build type
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    target_compile_options(remote_control PRIVATE -g)
+    target_compile_options(single_control PRIVATE -g)
+endif()
 
 # Output binaries to 'build' directory for both targets
 set_target_properties(remote_control single_control
