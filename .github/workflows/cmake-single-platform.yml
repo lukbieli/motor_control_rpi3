@@ -25,6 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
+        sudo apt install pkg-config
         sudo apt-get install -y libevdev-dev # Install libevdev development package
         wget https://github.com/joan2937/pigpio/archive/master.zip
         unzip master.zip
