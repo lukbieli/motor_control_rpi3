@@ -2,7 +2,7 @@
 Motor control with PID. Motor controller for AlphaBot using only RaspberryPi 3B
 https://www.waveshare.com/wiki/AlphaBot#Overview
 
-Be careful! Although raspberry Pi can be directly connected to Alphabot board All signals going into raspberry pi are 0-5V! According to docs of RPi3 t=%V can fry it! I tested it on raspberry Pi 3 and It was working fine but I used voltage converter 5V to 3.3V to make it safer.
+Be careful! Although raspberry Pi can be directly connected to Alphabot board All signals going into raspberry pi are 0-5V! According to docs of RPi3 5V can fry and destroy it! I tested it on raspberry Pi 3 and It was working fine but later I added voltage converter 5V to 3.3V to make it safer.
 
 # Dependencies
 ## Pigpio
