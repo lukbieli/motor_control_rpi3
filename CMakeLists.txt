@@ -38,8 +38,8 @@ find_package(Libevdev REQUIRED)
 find_package(pigpio REQUIRED)
 
 # Specify the path to the Libevdev include directory and library
-# set(Libevdev_INCLUDE_DIR /usr/include/libevdev-1.0)  # Replace with the actual path
-# set(Libevdev_LIBRARY /usr/lib/x86_64-linux-gnu/libevdev.so)  # Replace with the actual path
+set(Libevdev_INCLUDE_DIR /usr/include/libevdev-1.0)  # Replace with the actual path
+set(Libevdev_LIBRARY /usr/lib/arm-linux-gnueabihf/libevdev.so)  # Replace with the actual path
 
 # Add the remote_control executable
 add_executable(remote_control
@@ -57,14 +57,13 @@ add_executable(single_control
 # Link libraries for both targets
 target_link_libraries(remote_control
     PRIVATE
-    ${LIBEVDEV_LIBRARIES}
+    ${Libevdev_LIBRARY}
     pigpio
     pthread
 )
 
 target_link_libraries(single_control
     PRIVATE
-    ${LIBEVDEV_LIBRARIES}
     pigpio
     pthread
 )
@@ -72,13 +71,13 @@ target_link_libraries(single_control
 # Specify include directories for both targets
 target_include_directories(remote_control PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${LIBEVDEV_INCLUDE_DIRS}
+    # ${LIBEVDEV_INCLUDE_DIRS}
+    ${Libevdev_INCLUDE_DIR}
     ${PIGPIO_INCLUDE_DIRS}
 )
 
 target_include_directories(single_control PRIVATE
     ${CMAKE_SOURCE_DIR}
-    ${LIBEVDEV_INCLUDE_DIRS}
     ${PIGPIO_INCLUDE_DIRS}
 )
 
