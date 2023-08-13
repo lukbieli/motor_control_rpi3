@@ -39,7 +39,12 @@ find_package(pigpio REQUIRED)
 
 # Specify the path to the Libevdev include directory and library
 set(Libevdev_INCLUDE_DIR /usr/include/libevdev-1.0)  # Replace with the actual path
-set(Libevdev_LIBRARY /usr/lib/arm-linux-gnueabihf/libevdev.so)  # Replace with the actual path
+# Specify the path to the Libevdev library
+if(NOT DEFINED GITHUB_RUN)
+    # set(Libevdev_LIBRARY /usr/lib/x86_64-linux-gnu/libevdev.so)  # Default path
+    set(Libevdev_LIBRARY /usr/lib/arm-linux-gnueabihf/libevdev.so)  # Replace with the actual path
+endif()
+# set(Libevdev_LIBRARY /usr/lib/arm-linux-gnueabihf/libevdev.so)  # Replace with the actual path
 
 # Add the remote_control executable
 add_executable(remote_control
