@@ -32,3 +32,4 @@
 *.app
 
 build/*
+tools/plot_out/*
