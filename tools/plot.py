@@ -1,4 +1,5 @@
 import argparse
+import os
 import matplotlib.pyplot as plt
 
 def plot_data_to_png(dataL, dataR,filename):
@@ -67,12 +68,22 @@ def main():
     parser.add_argument('--limit', type=int, default=None, help='Limit the number of rows to read from files')
     args = parser.parse_args()
 
+    # Get the directory of the script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    # Construct the file paths for CSV files
+    left_csv_path = os.path.join(script_dir, '../build/motorLeftPid.csv')
+    right_csv_path = os.path.join(script_dir, '../build/motorRightPid.csv')
+
+    # Create the plot_out folder if it doesn't exist
+    output_folder = os.path.join(script_dir, 'plot_out')
+    os.makedirs(output_folder, exist_ok=True)
+
     # Read the CSV file into lists
     columns = []
     dataL = { 'OUT': [], 'ENC': [], 'IN': [], 'SET': [] }
     dataR = { 'OUT': [], 'ENC': [], 'IN': [], 'SET': [] }
 
-    with open("motorLeftPid.csv", 'r') as file_l:
+    with open(left_csv_path, 'r') as file_l:
         header = file_l.readline().strip().split(',')
         columns = [col.strip() for col in header]
 
@@ -86,7 +97,7 @@ def main():
             dataL['IN'].append(float(values[2]))
             dataL['SET'].append(float(values[3]))
 
-    with open("motorRightPid.csv", 'r') as file_r:
+    with open(right_csv_path, 'r') as file_r:
         header = file_r.readline().strip().split(',')
         columns = [col.strip() for col in header]
 
@@ -100,7 +111,10 @@ def main():
             dataR['IN'].append(float(values[2]))
             dataR['SET'].append(float(values[3]))
 
-    plot_data_to_png(dataL, dataR, args.filename)
+    # Generate the filename with the path to the plot_out folder
+    output_filepath = os.path.join(output_folder, args.filename)
+
+    plot_data_to_png(dataL, dataR, output_filepath)
 
 if __name__ == '__main__':
     main()
